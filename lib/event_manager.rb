@@ -31,6 +31,38 @@ def save_thank_you_letter(id,form_letter)
   end
 end
 
+def extract_contacts(id, phone_number)
+
+  clean_number = phone_number.gsub(/\D/, '')
+  valid_number = false
+
+  if clean_number.length == 10
+    valid_number = true
+  elsif clean_number.length == 11 and clean_number[0].to_i == 1
+    clean_number = clean_number[1..]
+    valid_number = true
+  end 
+
+  {id: id, raw: phone_number, clean: clean_number, validity: valid_number}
+  
+end
+
+def write_contacts_to_file(contacts)
+
+  puts "Writing contacts to file"
+
+  Dir.mkdir('contacts') unless Dir.exists?('contacts')
+
+  CSV.open('contacts/contacts.csv', 'w', write_headers: true, headers: ["ID", "Raw Phone Number", "Cleaned Phone Number", "Validity"]) do |csv|
+    contacts.each do |contact|
+      csv<< [contact[:id], contact[:raw], contact[:clean], contact[:validity]]
+    end
+  end
+
+  puts "Contacts file created"
+
+end
+
 puts 'Event Manager Initialized!'
 
 contents = CSV.open(
@@ -41,6 +73,8 @@ contents = CSV.open(
 
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
+
+contacts = [] 
 
 contents.each do |row|
   id = row[0]
@@ -53,24 +87,10 @@ contents.each do |row|
 
   form_letter = erb_template.result(binding)
 
-  #save_thank_you_letter(id, form_letter)
+  save_thank_you_letter(id, form_letter)
 
-  clean_number = phone_number.gsub(/\D/, '')
-  valid_number = false
-  p clean_number.length
-  p clean_number[0]
-  if clean_number.length == 10
-    valid_number = true
-  elsif clean_number.length == 11 and clean_number[0].to_i == 1
-    p "log, this number was cleaned up #{clean_number}"
-    clean_number = clean_number[1..]
-    valid_number = true
-  end 
-  p "#{clean_number} is #{valid_number ? "valid" : "invalid" }"
-  #if the phone number is less than 10 digits, assume that it is a bad number
-  #if the phone number is 10 digits, assume that it is good
-  #if the phone number is 11 digits and the first number is 1, trim the 1 and use the remaining 10
-  #if the number is 11 digits and the first number is not 1 then it is a bad number
-  #if the phone is more than 11, assume that it is bad
+  contacts << extract_contacts(id, phone_number)
+
 end
  
+write_contacts_to_file(contacts)
