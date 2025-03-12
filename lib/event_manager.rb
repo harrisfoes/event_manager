@@ -45,6 +45,7 @@ erb_template = ERB.new template_letter
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
+  phone_number = row[:homephone]
 
   zipcode = clean_zipcode(row[:zipcode])
   
@@ -52,6 +53,24 @@ contents.each do |row|
 
   form_letter = erb_template.result(binding)
 
-  save_thank_you_letter(id, form_letter)
+  #save_thank_you_letter(id, form_letter)
+
+  clean_number = phone_number.gsub(/\D/, '')
+  valid_number = false
+  p clean_number.length
+  p clean_number[0]
+  if clean_number.length == 10
+    valid_number = true
+  elsif clean_number.length == 11 and clean_number[0].to_i == 1
+    p "log, this number was cleaned up #{clean_number}"
+    clean_number = clean_number[1..]
+    valid_number = true
+  end 
+  p "#{clean_number} is #{valid_number ? "valid" : "invalid" }"
+  #if the phone number is less than 10 digits, assume that it is a bad number
+  #if the phone number is 10 digits, assume that it is good
+  #if the phone number is 11 digits and the first number is 1, trim the 1 and use the remaining 10
+  #if the number is 11 digits and the first number is not 1 then it is a bad number
+  #if the phone is more than 11, assume that it is bad
 end
  
