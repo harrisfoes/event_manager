@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'date'
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5,'0')[0..4]
@@ -75,11 +76,13 @@ template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
 contacts = [] 
+registered_time = []
 
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
   phone_number = row[:homephone]
+  date_registered = row[:regdate]
 
   zipcode = clean_zipcode(row[:zipcode])
   
@@ -87,10 +90,21 @@ contents.each do |row|
 
   form_letter = erb_template.result(binding)
 
-  save_thank_you_letter(id, form_letter)
+  # save_thank_you_letter(id, form_letter)
 
-  contacts << extract_contacts(id, phone_number)
+  # contacts << extract_contacts(id, phone_number)
+
+  #time average
+  formatted_date = DateTime.strptime(date_registered ,"%m/%d/%Y %H:%M")
+  registered_time << formatted_date.hour.to_i 
 
 end
  
-write_contacts_to_file(contacts)
+# write_contacts_to_file(contacts)
+
+#time average
+hour_counts = registered_time.tally
+max_count = hour_counts.values.max
+most_frequent_hours = hour_counts.select { |hour, count| count == max_count }
+puts "Most frequent time of registration is: #{most_frequent_hours}"
+
