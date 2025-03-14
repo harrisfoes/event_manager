@@ -1,0 +1,2 @@
+Max number of registrants in a given day: 7 registrants
+They registered on Monday

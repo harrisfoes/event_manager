@@ -1,0 +1,2 @@
+Max number of registrants in a given time: 3 times
+They registered at hour(s): 13 and 16
