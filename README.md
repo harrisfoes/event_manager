@@ -1,8 +1,8 @@
-# Event_manager
+# Event Manager
 
 This project was made following the requirements from The Odin Project.
 
-#What's inside?
+## What's inside?
 - reading from an csv file
 - cleaning entries
 - processing entries
